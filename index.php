@@ -1,27 +1,3 @@
-<?php
-
-/* function fileList() {
-
-	$path = './library/';
-	$listStr = '<div class="list">';
-	$listStr .= '<div><h3>File library <i id="fileAdd" class="fa fa-plus-square"></i></h3></div>';
-
-	$files = array_diff(scandir($path), array('..', '.'));
-
-	foreach ($files as $key => $value) {
-		
-		$listStr .= "<div class='fileurl' data-filelink='/$value'>$value <i class='fa fa-file-code-o'></i></div>";
-
-	};
-	$listStr .= '<div id="fileToSave">Save <i class="fa fa-floppy-o"></i></div>';
-	$listStr .= '</div>';
-
-	return $listStr;
-}*/
-
-?>
-
-
 <!doctype html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
@@ -46,33 +22,50 @@
       <div class="container">
 
 <div class="col side">
-	<?php //echo fileList(); ?>
   <div id="fileList"></div>
 </div>
-<div class="col main">
-  <h3 id="mainTitle" class="title"><span>&nbsp;</span> 
+<div id="mainBlock" class="col main">
+  <div id="header">
+   <input id="mainTitle" type="text" value="Select a file..."> 
    <i id="editToggle" class="fa fa-pencil-square-o" title="Edit"></i>
    <i id="fullScreen" class="fa fa-expand" title="Full screen view"></i>
    <i id="fileToSave" class="fa fa-floppy-o" title="Save file"></i>
+   </div>
    </h3>
 	 <div id="epiceditor"></div>
+   <div id="intro"><h2>Markdown editor</h2>
+   <p>
+     This is a proof of concept i've been working on to edit markdown files,<br/>
+
+     a bit like Wikitten but i wanted to be able to add, remove and rename the files.
+</p><p>
+     <i>NOTE: this is only ment for use on an local server, security is in my to-do list (below)</i>
+   </p>
+   
+    <ul>
+    <li><strong>To-do:</strong></li>
+    <li>Styling: it's just a prototype so far.</li>
+    <li>Add a file search.</li>
+    <li>Add key bindings (ctrl+s = save etc).</li>
+    <li>Add github gist support (or similar would be nice)</li>
+    <li>Make secure for a production server, writing to the file system and alowing file renaming isn't very safe</li>
+    <li>Refactor for mongodb and mysql</li>
+    <li>Tidy up code, refactor refartor refactor...</li>
+</ul>
+
+   </div>
 </div>
 
       </div>
       </div>
 
 
-        <!--
-        <script src="js/vendor/bootstrap.min.js"></script>
-        <script src="js/plugins.js"></script>
-        --> 
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-<script>window.jQuery || document.write('<script src="js/lib/jquery-1.11.3.min.js"><\/script>')</script>
-
-
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
         <script src="js/lib/EpicEditor-v0.2.2/js/epiceditor.js"></script>
         <script src="js/main.js"></script>
+
+
+
 
 
 </html>

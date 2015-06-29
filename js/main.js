@@ -1,11 +1,10 @@
 /*
  *
- *Class to list and edit mark down
+ * self initing class to list and edit mark down
  * used EpicEditor - An Embeddable JavaScript Markdown Editor (https://github.com/OscarGodson/EpicEditor)
  * and a serverside component to save data [edit.php] 
  *
  */
-
 
 
 var mdEditor = (function() {
@@ -13,16 +12,27 @@ var mdEditor = (function() {
     var removeUrlStr = '/remove.php';
     var editUrlStr = '/edit.php';
     var listUrlStr = '/list.php';
+    var renameUrlStr = '/rename.php';
 
+    //class elements
     var fileurls = document.getElementsByClassName("fileurl");
+    var fileurlsRenameBtns = document.getElementsByClassName("fa-file-code-o");
+    var fileurlsRemoveBtns = document.getElementsByClassName("fa-remove");
+
+    //id elements
     var fileToSaveBtn = document.getElementById("fileToSave");
     var fileAdd = document.getElementById("fileAdd");
     var fileListStr = document.getElementById("fileList");
-    var mainTitleStr = document.getElementById("mainTitle").getElementsByTagName("span")[0];
+    var mainTitleStr = document.getElementById("mainTitle");
     var fullscreenBtn = document.getElementById("fullScreen");
     var editToggleBtn = document.getElementById("editToggle");
+    var headerBlock = document.getElementById("header");
+    var introBlock = document.getElementById("intro");
+    var mainBlock = document.getElementById("mainBlock");
 
-    //privates variables
+
+
+    //epiceditor variables
     var opts = {
         container: 'epiceditor',
         textarea: null,
@@ -59,12 +69,7 @@ var mdEditor = (function() {
 
     //init md editor
     var editor = new EpicEditor(opts);
-    editor.load(function() {
 
-        console.log("Editor loaded.");
-        console.log(editor.settings.file.name);
-
-    });
 
     /*
      * get list html
@@ -80,12 +85,15 @@ var mdEditor = (function() {
 
             //reset vars
             mdEditor.fileurls = document.getElementsByClassName("fileurl");
+            mdEditor.fileurlsRenameBtns = document.getElementsByClassName("fa-file-code-o");
+            mdEditor.fileurlsRemoveBtns = document.getElementsByClassName("fa-remove");
             mdEditor.fileToSaveBtn = document.getElementById("fileToSave");
             mdEditor.fileAdd = document.getElementById("fileAdd");
             mdEditor.fileListStr = document.getElementById("fileList");
-            mdEditor.mainTitleStr = document.getElementById("mainTitle").getElementsByTagName("span")[0];
+            mdEditor.mainTitleStr = document.getElementById("mainTitle");
             mdEditor.fullscreenBtn = document.getElementById("fullScreen");
             mdEditor.editToggleBtn = document.getElementById("editToggle");
+
 
 
             //Adds file open listerners
@@ -96,25 +104,43 @@ var mdEditor = (function() {
     };
 
 
-	/*
-	 * file new action
-	 */
-	var fileAddonclick = function() {
+/*
+    var changeMenu = function() {
+
+console.log('scroll');
+    var scrollBarPosition = window.pageYOffset | document.body.scrollTop;
+
+        if(scrollBarPosition === 0) {
+
+            console.log("User is on top of the page, position=" + scrollBarPosition);
+
+        } else {
+
+            console.log("User is not on top of the page, position="  + scrollBarPosition);
+
+        }
+    };
+*/
+
+    /*
+     * file new action
+     */
+    var fileAddonclick = function() {
 
 
         $.ajax({
             type: "POST",
             url: editUrlStr,
-            success: ( function(data) {
+            success: (function(data) {
 
-                    console.log('Success added: ' + data);
-                    getFileList();
+                console.log('Success added: ' + data);
+                getFileList();
 
             })
         });
 
 
-	};
+    };
 
 
 
@@ -132,12 +158,22 @@ var mdEditor = (function() {
         }
 
 
+        for (var y = 0; y < fileurlsRemoveBtns.length; y++) {
 
-        mdEditor.fileToSaveBtn.addEventListener('click', fileClickSave, false);
+            var _fileurlsRemoveBtns = fileurlsRemoveBtns[y];
+
+            _fileurlsRemoveBtns.addEventListener('click', fileClickRemove, false);
+
+        }
+
+
+        mdEditor.fileToSaveBtn.addEventListener('click', fileClickSaveOrRename, false);
         mdEditor.fileAdd.addEventListener('click', fileAddonclick, false);
-
         mdEditor.fullscreenBtn.addEventListener('click', fullscreenAction, false);
         mdEditor.editToggleBtn.addEventListener('click', editToggleAction, false);
+
+
+
 
 
 
@@ -162,17 +198,32 @@ var mdEditor = (function() {
         }
 
 
+    editor.load(function() {
+
+        console.log("Editor loaded.");
+        console.log(editor.settings.file.name);
+        headerBlock.style.display="block";
+        introBlock.style.display="none";
+    });
+
         //import the file
         $.get('/library/' + fileName, function(data) {
-            //editor.remove(fileName);
+            
+        if (!!editor) {
+            editor.load(function () {
+              console.log("Editor loaded.");
+            });
+        }
             editor.importFile(fileName, data);
             editor.preview();
 
             //update the file title
-            mainTitleStr.innerHTML = fileName;
+            mainTitleStr.value = fileName;
 
             //console.log(data);
         });
+
+        return fileName;
 
     };
 
@@ -197,7 +248,45 @@ var mdEditor = (function() {
                 function() {
 
                     console.log('Success saved to: ' + theFileName);
-            		editor.preview();
+                    editor.preview();
+
+                })
+        });
+
+    };
+
+    /*
+     * file save action
+     */
+    var fileClickRemove = function(e) {
+
+        fileClickAction(e);
+
+        //asign the data-filelink string
+        var fileName = editor.settings.file.name;
+
+        if (!!e) {
+
+            fileName = e.target.dataset.filelink;
+
+        }
+
+
+        $.ajax({
+            type: "POST",
+            url: removeUrlStr,
+            data: {
+                'fileName': fileName
+            },
+            success: (
+                function(data) {
+
+                    getFileList();
+                    mainTitleStr.value = 'Select a file...';
+                    editor.unload(function () {
+                      console.log("Editor unloaded.");
+                    });
+
 
                 })
         });
@@ -205,18 +294,54 @@ var mdEditor = (function() {
     };
 
 
-
     /*
-     * edit in full screen
-     * 
+     * file save action
      */
-    var fullscreenAction = function(e) {
+    var fileClickSaveOrRename = function() {
 
 
-        editor.exitFullscreen();
+            var theContent = editor.exportFile();
+            var fileName = editor.settings.file.name;
+            console.log(mainTitleStr.value.length);
+
+
+            if (mainTitleStr.value.length === 0) {
+                console.log('What happened to my new file name!');
+                return null;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: renameUrlStr,
+                data: {
+                    'newFileName': mainTitleStr.value,
+                    'fileName': fileName
+                },
+                success: (
+                    function(data) {
+
+                        getFileList();
+                        editor.settings.file.name = mainTitleStr.value;
+                        fileClickAction();
+                        console.log(data);
+
+                    })
+            });
 
     };
 
+
+    /*
+     * edit in full screen
+     */
+    var fullscreenAction = function(e) {   editor.exitFullscreen();   };
+
+
+
+
+    /*
+     * toggle preview/Edit
+     */
     var editToggleAction = function(e) {
 
         if (editor.is('preview')) {
@@ -245,21 +370,18 @@ var mdEditor = (function() {
 
         init: (function() {
 
+            //settings for ajax note: remove when i purge jquery
             $.ajaxSetup({
                 cache: false,
                 mimeType: "text/plain"
             });
 
 
-            getFileList(); //pull in file list
+            //pull in file list
+            getFileList(); 
 
 
-
-
-            // _fileUrlOnClickAction();
-
-            //setUpFileOpenClicks();
-            //initListeners();
+        //window.addEventListener('scroll', mdEditor.changeMenu, false);
 
 
 
@@ -273,60 +395,6 @@ var mdEditor = (function() {
 })();
 
 
-
-
-/*
- * open initial file action
- */
-/*   var openInitfile = function(e) {
-
-        //asign the data-filelink string
-        var fileName = editor.settings.file.name;
-
-        if (fileName === 'epiceditor') {
-            return null;
-        }
-        //import the file
-        $.get('/library' + fileName, function(data) {
-            //editor.remove(fileName);
-            editor.importFile(fileName, data);
-            editor.preview();
-            console.log(data);
-        });
-
-    };/*
-
-
-
-
-    editor.on('autosave', function() {
-
-        fileSaveonclick();
-
-    });
-
-
-
-    /*var setUpFileRemoveClicks = function(e) {
-
-  			//editor.remove(name);
-
-			var theFileName = editor.settings.file.name;
-
-			 
-			$.ajax({
-			  type: "POST",
-			  url: removeUrlStr,
-			  data: { str:theContent, fileName: theFileName },
-			  success: ( function(){ console.log('Successfully removed: '+theFileName);} ) 
-			});
-
-
-	}*/
-
-
-
-
-//call on load
 document.addEventListener('DOMContentLoaded', mdEditor.init, false);
-//mdEditor();
+
+
