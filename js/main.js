@@ -9,10 +9,10 @@
 
 var mdEditor = (function() {
 
-    var removeUrlStr = '/remove.php';
-    var editUrlStr = '/edit.php';
-    var listUrlStr = '/list.php';
-    var renameUrlStr = '/rename.php';
+    var listUrlStr = '/list.php'; //list all files in library
+    var removeUrlStr = '/remove.php'; //remove a file
+    var editUrlStr = '/edit.php'; //add a new file or 
+    var renameUrlStr = '/rename.php'; //rename file
 
     //class elements
     var fileurls = document.getElementsByClassName("fileurl");
@@ -295,21 +295,23 @@ console.log('scroll');
 
 
     /*
-     * file save action
+     * file save action or rename file
      */
     var fileClickSaveOrRename = function() {
+
+            fileClickSave(); //saves contents
+
 
 
             var theContent = editor.exportFile();
             var fileName = editor.settings.file.name;
-            console.log(mainTitleStr.value.length);
-
 
             if (mainTitleStr.value.length === 0) {
                 console.log('What happened to my new file name!');
                 return null;
             }
 
+            //rename file
             $.ajax({
                 type: "POST",
                 url: renameUrlStr,
@@ -324,7 +326,6 @@ console.log('scroll');
                         editor.settings.file.name = mainTitleStr.value;
                         fileClickAction();
                         console.log(data);
-
                     })
             });
 
