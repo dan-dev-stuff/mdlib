@@ -8,8 +8,8 @@ function rename_this_file() {
 
 
     $here = getcwd() ;
-    $fileName = $here.'/library/'.$_POST['fileName'];
-    $newFileName = $here.'/library/'.$_POST['newFileName'];
+    $fileName = '../library/'.$_POST['fileName'];
+    $newFileName = '../library/'.$_POST['newFileName'];
 
 
 

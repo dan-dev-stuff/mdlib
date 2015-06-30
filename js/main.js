@@ -6,13 +6,27 @@
  *
  */
 
+/*
+mdEditor.fileListAction()
+mdEditor.fileNewAction()
+mdEditor.setAddEventListeners()
+mdEditor.fileOpenAction()
+mdEditor.fileSaveAction()
+mdEditor.fileClickRemove()
+mdEditor.fileRenameAndSave()
+mdEditor.fullScreenAction()
+mdEditor.editToggleAction()
+*/
+
 
 var mdEditor = (function() {
 
-    var listUrlStr = '/list.php'; //list all files in library
-    var removeUrlStr = '/remove.php'; //remove a file
-    var editUrlStr = '/edit.php'; //add a new file or 
-    var renameUrlStr = '/rename.php'; //rename file
+    /******************/
+
+    var listUrlStr = '/actions/list.php'; //list all files in library
+    var removeUrlStr = '/actions/remove.php'; //remove a file
+    var editUrlStr = '/actions/edit.php'; //add a new file or 
+    var renameUrlStr = '/actions/rename.php'; //rename file
 
     //class elements
     var fileurls = document.getElementsByClassName("fileurl");
@@ -71,11 +85,12 @@ var mdEditor = (function() {
     var editor = new EpicEditor(opts);
 
 
+    /******************/
+
     /*
      * get list html
-     * 
      */
-    var getFileList = function() {
+    var fileListAction = function() {
 
         //import the file
         $.get(listUrlStr, function(data) {
@@ -94,8 +109,6 @@ var mdEditor = (function() {
             mdEditor.fullscreenBtn = document.getElementById("fullScreen");
             mdEditor.editToggleBtn = document.getElementById("editToggle");
 
-
-
             //Adds file open listerners
             setAddEventListeners();
 
@@ -104,28 +117,10 @@ var mdEditor = (function() {
     };
 
 
-/*
-    var changeMenu = function() {
-
-console.log('scroll');
-    var scrollBarPosition = window.pageYOffset | document.body.scrollTop;
-
-        if(scrollBarPosition === 0) {
-
-            console.log("User is on top of the page, position=" + scrollBarPosition);
-
-        } else {
-
-            console.log("User is not on top of the page, position="  + scrollBarPosition);
-
-        }
-    };
-*/
-
     /*
-     * file new action
+     * adds a new file 
      */
-    var fileAddonclick = function() {
+    var fileNewAction = function() {
 
 
         $.ajax({
@@ -134,7 +129,7 @@ console.log('scroll');
             success: (function(data) {
 
                 console.log('Success added: ' + data);
-                getFileList();
+                fileListAction();
 
             })
         });
@@ -143,21 +138,22 @@ console.log('scroll');
     };
 
 
-
     /*
      *  file click listener loop
      */
     var setAddEventListeners = function() {
 
+
+        //open action added to all file buttons
         for (var i = 0; i < fileurls.length; i++) {
 
             var _thisFile = fileurls[i];
 
-            _thisFile.addEventListener('click', fileClickAction, false);
+            _thisFile.addEventListener('click', fileOpenAction, false);
 
         }
 
-
+        //remove action added to all file buttons
         for (var y = 0; y < fileurlsRemoveBtns.length; y++) {
 
             var _fileurlsRemoveBtns = fileurlsRemoveBtns[y];
@@ -167,14 +163,10 @@ console.log('scroll');
         }
 
 
-        mdEditor.fileToSaveBtn.addEventListener('click', fileClickSaveOrRename, false);
-        mdEditor.fileAdd.addEventListener('click', fileAddonclick, false);
-        mdEditor.fullscreenBtn.addEventListener('click', fullscreenAction, false);
+        mdEditor.fileToSaveBtn.addEventListener('click', fileRenameAndSave, false);
+        mdEditor.fileAdd.addEventListener('click', fileNewAction, false);
+        mdEditor.fullscreenBtn.addEventListener('click', fullScreenAction, false);
         mdEditor.editToggleBtn.addEventListener('click', editToggleAction, false);
-
-
-
-
 
 
 
@@ -186,7 +178,7 @@ console.log('scroll');
     /*
      * open file on click action
      */
-    var fileClickAction = function(e) {
+    var fileOpenAction = function(e) {
 
         //asign the data-filelink string
         var fileName = editor.settings.file.name;
@@ -198,29 +190,32 @@ console.log('scroll');
         }
 
 
-    editor.load(function() {
+        editor.load(function() {
 
-        console.log("Editor loaded.");
-        console.log(editor.settings.file.name);
-        headerBlock.style.display="block";
-        introBlock.style.display="none";
-    });
+            console.log("Editor loaded.");
+            console.log(editor.settings.file.name);
+            headerBlock.style.display = "block";
+            introBlock.style.display = "none";
+
+        });
 
         //import the file
         $.get('/library/' + fileName, function(data) {
-            
-        if (!!editor) {
-            editor.load(function () {
-              console.log("Editor loaded.");
-            });
-        }
+
+            if (!!editor) {
+
+                editor.load(function() {
+                    console.log("Editor loaded.");
+                });
+
+            }
+
             editor.importFile(fileName, data);
             editor.preview();
 
             //update the file title
             mainTitleStr.value = fileName;
 
-            //console.log(data);
         });
 
         return fileName;
@@ -232,7 +227,7 @@ console.log('scroll');
     /*
      * file save action
      */
-    var fileClickSave = function() {
+    var fileSaveAction = function() {
 
         var theContent = editor.exportFile();
         var theFileName = editor.settings.file.name;
@@ -255,12 +250,13 @@ console.log('scroll');
 
     };
 
+
     /*
      * file save action
      */
     var fileClickRemove = function(e) {
 
-        fileClickAction(e);
+        fileOpenAction(e);
 
         //asign the data-filelink string
         var fileName = editor.settings.file.name;
@@ -281,10 +277,10 @@ console.log('scroll');
             success: (
                 function(data) {
 
-                    getFileList();
+                    fileListAction();
                     mainTitleStr.value = 'Select a file...';
-                    editor.unload(function () {
-                      console.log("Editor unloaded.");
+                    editor.unload(function() {
+                        console.log("Editor unloaded.");
                     });
 
 
@@ -297,47 +293,48 @@ console.log('scroll');
     /*
      * file save action or rename file
      */
-    var fileClickSaveOrRename = function() {
+    var fileRenameAndSave = function() {
 
-            fileClickSave(); //saves contents
+        fileSaveAction(); //saves contents
 
+        var theContent = editor.exportFile();
+        var fileName = editor.settings.file.name;
 
+        if (mainTitleStr.value.length === 0) {
+            console.log('What happened to my new file name!');
+            return null;
+        }
 
-            var theContent = editor.exportFile();
-            var fileName = editor.settings.file.name;
+        //rename file
+        $.ajax({
+            type: "POST",
+            url: renameUrlStr,
+            data: {
+                'newFileName': mainTitleStr.value,
+                'fileName': fileName
+            },
+            success: (
+                function(data) {
 
-            if (mainTitleStr.value.length === 0) {
-                console.log('What happened to my new file name!');
-                return null;
-            }
+                    fileListAction();
+                    editor.settings.file.name = mainTitleStr.value;
+                    fileOpenAction();
+                    console.log(data);
 
-            //rename file
-            $.ajax({
-                type: "POST",
-                url: renameUrlStr,
-                data: {
-                    'newFileName': mainTitleStr.value,
-                    'fileName': fileName
-                },
-                success: (
-                    function(data) {
-
-                        getFileList();
-                        editor.settings.file.name = mainTitleStr.value;
-                        fileClickAction();
-                        console.log(data);
-                    })
-            });
+                })
+        });
 
     };
+
 
 
     /*
      * edit in full screen
      */
-    var fullscreenAction = function(e) {   editor.exitFullscreen();   };
+    var fullScreenAction = function(e) {
+        editor.exitFullscreen();
 
-
+    };
 
 
     /*
@@ -365,13 +362,12 @@ console.log('scroll');
 
 
 
-
     // Return an object exposed to the public
     return {
 
         init: (function() {
 
-            //settings for ajax note: remove when i purge jquery
+            //settings for ajax (note: remove when i purge jquery)
             $.ajaxSetup({
                 cache: false,
                 mimeType: "text/plain"
@@ -379,13 +375,7 @@ console.log('scroll');
 
 
             //pull in file list
-            getFileList(); 
-
-
-        //window.addEventListener('scroll', mdEditor.changeMenu, false);
-
-
-
+            fileListAction();
 
         })
 
@@ -397,5 +387,3 @@ console.log('scroll');
 
 
 document.addEventListener('DOMContentLoaded', mdEditor.init, false);
-
-

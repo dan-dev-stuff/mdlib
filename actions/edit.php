@@ -1,7 +1,6 @@
 <?php 
 
-$here = getcwd() ;
-$getFileName = $here.'/library/'.$_POST['fileName'];
+$getFileName = '../library/'.$_POST['fileName'];
 
 if (isset( $_POST['str'] )) {
 	
@@ -14,7 +13,7 @@ if (isset( $_POST['str'] )) {
 }
 
 if (!isset($_POST['fileName'])) {
-   $getFileName = $here.'/library/'.random_string(15).'.md';
+   $getFileName = '../library/'.random_string(15).'.md';
 }
 
 $file = fopen($getFileName, "w") or die("can't open file: $getFileName");

@@ -6,7 +6,7 @@ $getFileName = $_POST['fileName'];
 if (!isset($getFileName))  {return die("Please provide a file name");}
 
 $here = getcwd();
-$getFilePath = $here.'/library/'.$getFileName;
+$getFilePath = '../library/'.$getFileName;
 
 if (file_exists($getFilePath)) {
 	unlink($getFilePath);
