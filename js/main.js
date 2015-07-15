@@ -7,7 +7,7 @@
  */
 
 /*
-mdEditor.fileListAction()
+mdEditor.fileListAction() : now using handlbars
 mdEditor.fileNewAction()
 mdEditor.setAddEventListeners()
 mdEditor.fileOpenAction()
@@ -44,7 +44,11 @@ var mdEditor = (function() {
     var introBlock = document.getElementById("intro");
     var mainBlock = document.getElementById("mainBlock");
 
-
+    // Retrieve the template data from the HTML (jQuery is used here).
+    var listTpl = $('#listTemplate').html();
+    // Compile the template data into a function
+    var templateScript = Handlebars.compile(listTpl);
+                          
 
     //epiceditor variables
     var opts = {
@@ -92,12 +96,15 @@ var mdEditor = (function() {
      */
     var fileListAction = function() {
 
-        //import the file
-        $.get(listUrlStr, function(data) {
+        $.ajax({
+            type: "POST",
+            url: listUrlStr,
+            dataType: 'json',
+            success: (function(data) {
 
-            //reload list 
-            fileListStr.innerHTML = data;
-
+            //handlebars template
+            fileListStr.innerHTML = templateScript(data);
+            
             //reset vars
             mdEditor.fileurls = document.getElementsByClassName("fileurl");
             mdEditor.fileurlsRenameBtns = document.getElementsByClassName("fa-file-code-o");
@@ -112,13 +119,14 @@ var mdEditor = (function() {
             //Adds file open listerners
             setAddEventListeners();
 
+            })
         });
 
     };
 
 
     /*
-     * adds a new file 
+     * adds a new file (just hits edit.php ...not secure needs something like: http://fullthrottledevelopment.com/php-nonce-library)
      */
     var fileNewAction = function() {
 
@@ -180,7 +188,7 @@ var mdEditor = (function() {
      */
     var fileOpenAction = function(e) {
 
-        //asign the data-filelink string
+        //assign the data-filelink string
         var fileName = editor.settings.file.name;
 
         if (!!e) {
@@ -199,8 +207,11 @@ var mdEditor = (function() {
 
         });
 
-        //import the file
-        $.get('/library/' + fileName, function(data) {
+
+        $.ajax({
+            type: "POST",
+            url: '/library/' + fileName,
+            success: (function(data) {
 
             if (!!editor) {
 
@@ -216,7 +227,8 @@ var mdEditor = (function() {
             //update the file title
             mainTitleStr.value = fileName;
 
-        });
+        })
+    });
 
         return fileName;
 
@@ -387,3 +399,16 @@ var mdEditor = (function() {
 
 
 document.addEventListener('DOMContentLoaded', mdEditor.init, false);
+
+
+Handlebars.registerHelper("debug", function(optionalValue) {
+  console.log("Current Context");
+  console.log("====================");
+  console.log(this);
+ 
+  if (optionalValue) {
+    console.log("Value");
+    console.log("====================");
+    console.log(optionalValue);
+  }
+});

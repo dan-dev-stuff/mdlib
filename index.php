@@ -31,7 +31,6 @@
    <i id="fullScreen" class="fa fa-expand" title="Full screen view"></i>
    <i id="fileToSave" class="fa fa-floppy-o" title="Save file"></i>
    </div>
-   </h3>
 	 <div id="epiceditor"></div>
    <div id="intro"><h2>Markdown editor</h2>
    <p>
@@ -59,11 +58,37 @@
       </div>
       </div>
 
+        <script id="headerTemplate" type="text/x-handlebars-template">
+
+           <div id="header">
+  
+           <input id="mainTitle" type="text" value="{{#if title}}{{title}}{{else}}Select a file...{{/if}}"> 
+
+           <i id="editToggle" class="fa fa-pencil-square-o" title="Edit"></i>
+           <i id="fullScreen" class="fa fa-expand" title="Full screen view"></i>
+           <i id="fileToSave" class="fa fa-floppy-o" title="Save file"></i>
+           </div>
+
+        </script>
+
+
+        <script id="listTemplate" type="text/x-handlebars-template">
+
+        <div class="list">
+          <div>
+            <h3>File library <i id="fileAdd" class="fa fa-plus-square" title="Add a new file"></i></h3>
+          </div>
+
+              {{#each files}}
+              <div class='fileurl' title='Select {{this}}' data-filelink='{{this}}'>{{this}}<i class='fa fa-remove' data-filelink='{{this}}' title='Delete file'></i> </div>
+              {{/each}}
+        </div>
+        </script>
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script src="js/lib/handlebars-v3.0.3.js"></script>
         <script src="js/lib/EpicEditor-v0.2.2/js/epiceditor.js"></script>
         <script src="js/main.js"></script>
-
 
 
 
